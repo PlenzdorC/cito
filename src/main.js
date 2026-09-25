@@ -23,7 +23,7 @@ import * as S from './core/state.js';
 import { createStore } from './core/store.js';
 import { parseEmbedParams } from './services/embed.js';
 import { submitLead } from './services/lead.js';
-import { loadSavedConfiguration } from './services/storage.js';
+import { clearSavedConfiguration, loadSavedConfiguration } from './services/storage.js';
 import { appTemplate } from './ui/app.js';
 import { exposeTemplate } from './ui/print-expose.js';
 
@@ -183,7 +183,15 @@ window.addEventListener('hashchange', () => {
     store.setState((s) => S.goToStep(S.loadConfiguration(s, decoded.config), decoded.step ?? s.step));
   }
 });
-if (saved) toast('info', 'Deine gespeicherte Konfiguration wurde geladen.');
+if (saved) {
+  toast('info', 'Deine gespeicherte Konfiguration wurde geladen.', {
+    label: 'Neu beginnen',
+    run: () => {
+      clearSavedConfiguration(safeLocalStorage());
+      store.setState(S.resetConfiguration);
+    },
+  });
+}
 startViewer();
 
 // Nur im Entwicklungsmodus: Zugriff für Debugging und manuelle Tests in der Browser-Konsole

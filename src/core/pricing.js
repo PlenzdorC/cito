@@ -161,6 +161,10 @@ export function subtotalUntil(breakdown, step) {
     .reduce((sum, [, amount]) => sum + amount, breakdown.basePrice);
 }
 
+/** Höchstes wählbares Eigenkapital (Anteil am Gesamtpreis, auf Reglerschritte abgerundet). */
+export const maxEquity = (total, financing = FINANCING) =>
+  Math.floor((total * financing.maxEquityShare) / financing.equityStep) * financing.equityStep;
+
 /** Monatliche Annuität (Zins + anfängliche Tilgung) auf den finanzierten Betrag. */
 export function monthlyRate(total, equity = 0, financing = FINANCING) {
   const loan = Math.max(0, total - equity);

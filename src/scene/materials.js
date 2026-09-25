@@ -30,6 +30,9 @@ export function createMaterials() {
 
   const led = std({ color: 0xfff4e0, emissive: new THREE.Color(0xffe3b0), emissiveIntensity: 0.2 });
   const screen = std({ color: 0x1b2a3a, emissive: new THREE.Color(0x4aa3ff), emissiveIntensity: 0.6, roughness: 0.3 });
+  // Eigenes Material für die Wallbox-Statusleuchte: Außenanlage darf keine Haus-Materialien teilen,
+  // sonst wirkt die Schnittebene der Schnittansicht auch auf sie.
+  const statusLed = std({ color: 0x173326, emissive: new THREE.Color(0x3ddc84), emissiveIntensity: 0.9, roughness: 0.3 });
   const pendant = std({ color: 0xf2e9dc, emissive: new THREE.Color(0xffd29a), emissiveIntensity: 0.15, roughness: 0.5 });
   const fire = std({ color: 0x220a02, emissive: new THREE.Color(0xff7a2a), emissiveIntensity: 1.2 });
 
@@ -62,6 +65,7 @@ export function createMaterials() {
     lamella: get('lamella', () => std({ map: T.lamellaTexture(), roughness: 0.5, metalness: 0.4 })),
     led,
     screen,
+    statusLed,
     pendant,
     fire,
     roof: get('roof', () => std({ map: T.roofSeamTexture(), roughness: 0.55, metalness: 0.5 })),

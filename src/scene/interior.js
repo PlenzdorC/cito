@@ -157,56 +157,56 @@ function plant(materials, x, z) {
   return g;
 }
 
-/**
- * @returns {{ group: THREE.Group, walls: THREE.Group[], size: {w: number, h: number}, pendantLight: THREE.PointLight }}
- */
-export function buildInterior(config, derived, materials) {
-  const { plan, openings, geo } = derived;
-  const room = plan.floors[0].rooms.find((r) => r.kind === 'living');
-  const w = room.w;
-  const h = room.h;
-  const level = geo.floorLevels[0];
-  const group = new THREE.Group();
-  group.name = 'innenraum';
-  const frameMaterial = materials.frame(config.frame);
+/** Fenster des Wohnraums in raumlokalen Koordinaten (x entlang der jeweiligen Wand, y ab Fußboden). */
+function roomOpenings(derived, room) {
+  const level = derived.geo.floorLevels[0];
+  const ofRoom = (edge) => derived.openings.filter((o) => o.roomId === room.id && o.edge === edge);
+  return {
+    garden: ofRoom('vS').map((o) => ({ ...o, x: o.u - room.u - room.w / 2, y: o.y - level })),
+    endLeft: ofRoom('u0').map((o) => ({ ...o, x: o.v - room.v - room.h / 2, y: o.y - level })),
+  };
+}
 
-  const toLocal = (o) => ({ ...o, y: o.y - level });
-  const garden = openings.filter((o) => o.roomId === 'wohnen' && o.edge === 'vS').map((o) => toLocal({ ...o, x: o.u - room.u - w / 2 }));
-  const endLeft = openings.filter((o) => o.roomId === 'wohnen' && o.edge === 'u0').map((o) => toLocal({ ...o, x: o.v - room.v - h / 2 }));
-  const doorX = w / 2 - 1.1;
-  const door = { kind: 'door', x: -doorX, y: 0, width: 0.95, height: config.tallDoors ? 2.5 : 2.05 };
-
-  const walls = [
-    wallGroup({ length: w + WALL * 2, openings: garden, position: new THREE.Vector3(0, 0, h / 2 + WALL / 2), rotationY: 0, normal: new THREE.Vector3(0, 0, 1), materials, frameMaterial }),
-    wallGroup({ length: w + WALL * 2, openings: [door], position: new THREE.Vector3(0, 0, -h / 2 - WALL / 2), rotationY: 0, normal: new THREE.Vector3(0, 0, -1), materials, frameMaterial }),
-    wallGroup({ length: h, openings: endLeft, position: new THREE.Vector3(-w / 2 - WALL / 2, 0, 0), rotationY: -Math.PI / 2, normal: new THREE.Vector3(-1, 0, 0), materials, frameMaterial }),
-    wallGroup({ length: h, openings: [], position: new THREE.Vector3(w / 2 + WALL / 2, 0, 0), rotationY: Math.PI / 2, normal: new THREE.Vector3(1, 0, 0), materials, frameMaterial }),
+/** Vier Wände (Garten, Rückwand mit Tür, links, rechts); lokal +z zeigt jeweils nach außen. */
+function roomWalls({ w, h }, windows, door, materials, frameMaterial) {
+  const common = { materials, frameMaterial };
+  return [
+    wallGroup({ ...common, length: w + WALL * 2, openings: windows.garden, position: new THREE.Vector3(0, 0, h / 2 + WALL / 2), rotationY: 0, normal: new THREE.Vector3(0, 0, 1) }),
+    wallGroup({ ...common, length: w + WALL * 2, openings: [door], position: new THREE.Vector3(0, 0, -h / 2 - WALL / 2), rotationY: Math.PI, normal: new THREE.Vector3(0, 0, -1) }),
+    wallGroup({ ...common, length: h, openings: windows.endLeft, position: new THREE.Vector3(-w / 2 - WALL / 2, 0, 0), rotationY: -Math.PI / 2, normal: new THREE.Vector3(-1, 0, 0) }),
+    wallGroup({ ...common, length: h, openings: [], position: new THREE.Vector3(w / 2 + WALL / 2, 0, 0), rotationY: Math.PI / 2, normal: new THREE.Vector3(1, 0, 0) }),
   ];
-  // Rückwand: Türblatt im Durchgang (Blick aus dem Raum: Tür rechts)
-  const backWall = walls[1];
+}
+
+/** Türblatt, Smart-Home-Panel und Lüftungsauslässe (Innenseite = lokal −z). */
+function equipWalls([, backWall, leftWall], door, config, materials) {
   backWall.add(box(door.width - 0.04, door.height - 0.02, 0.04, materials.white, door.x, door.height / 2, -0.02));
-  backWall.add(box(0.14, 0.02, 0.03, materials.steel, door.x + 0.32, 1.05, -0.07));
-  if (config.smartHome) {
-    backWall.add(box(0.2, 0.14, 0.02, materials.screen, door.x + 0.95, 1.45, -WALL / 2 - 0.01, false));
-  }
+  backWall.add(box(0.14, 0.02, 0.03, materials.steel, door.x - 0.32, 1.05, -0.07));
+  // Panel auf der Essplatz-Seite der Tür (Welt −x = lokal +x)
+  if (config.smartHome) backWall.add(box(0.2, 0.14, 0.02, materials.screen, door.x + 0.8, 1.45, -WALL / 2 - 0.01, false));
   if (config.ventilation) {
-    walls[2].add(...[-0.8, 0.8].map((dx) => {
+    [-0.8, 0.8].forEach((dx) => {
       const vent = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.02, 20), materials.white, false);
       vent.rotation.x = Math.PI / 2;
       vent.position.set(dx, 2.35, -WALL / 2 - 0.01);
-      return vent;
-    }));
+      leftWall.add(vent);
+    });
   }
-  group.add(...walls);
+}
 
-  const floorGeometry = new THREE.BoxGeometry(w + WALL * 2, 0.06, h + WALL * 2);
-  const uv = floorGeometry.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * (w + WALL * 2), uv.getY(i) * (h + WALL * 2));
-  const floor = mesh(floorGeometry, materials.floor(config.flooring), false);
+function roomFloor({ w, h }, config, materials) {
+  const width = w + WALL * 2;
+  const depth = h + WALL * 2;
+  const geometry = new THREE.BoxGeometry(width, 0.06, depth);
+  const uv = geometry.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width, uv.getY(i) * depth);
+  const floor = mesh(geometry, materials.floor(config.flooring), false);
   floor.position.y = -0.03;
-  group.add(floor);
+  return floor;
+}
 
-  // Möblierung: lange Räume in drei Zonen, kompakte Räume zweireihig
+/** Möblierung: lange Räume in drei Zonen (Wohnen | Essen | Kochen), kompakte Räume zweireihig. */
+function furnish(group, { w, h }, config, materials) {
   const long = w >= 8.5;
   const livingX = -w / 2 + Math.min(2.2, w * 0.24);
   group.add(box(2.7, 0.012, 2.1, materials.rug, livingX + 0.1, 0.006, 0.25, false));
@@ -216,28 +216,43 @@ export function buildInterior(config, derived, materials) {
   if (config.stove) group.add(stove(materials, -w / 2 + 0.55, h / 2 - 0.85));
 
   const kitchenX = w / 2 - 1.9;
-  const zBack = -h / 2;
-  if (long) {
-    group.add(diningSet(materials, 0.4, 0.35, 3));
-  } else {
-    group.add(diningSet(materials, kitchenX, h / 2 - 1.2, 2));
-  }
+  const dining = long ? { x: 0.4, z: 0.35, chairs: 3 } : { x: kitchenX, z: h / 2 - 1.2, chairs: 2 };
+  group.add(diningSet(materials, dining.x, dining.z, dining.chairs));
   const island = config.kitchen && h >= 4.2 && (long || h >= 5.4);
-  group.add(config.kitchen ? kitchen(materials, kitchenX, zBack, island) : kitchenPlaceholder(materials, kitchenX, zBack));
+  group.add(config.kitchen ? kitchen(materials, kitchenX, -h / 2, island) : kitchenPlaceholder(materials, kitchenX, -h / 2));
+  return dining;
+}
 
-  // Pendelleuchten über dem Esstisch
-  const pendantX = long ? 0.4 : kitchenX;
-  const pendantZ = long ? 0.35 : h / 2 - 1.2;
+/** Drei Pendelleuchten über dem Esstisch plus Punktlicht für den Nachtmodus. */
+function pendants(group, dining, materials) {
   [-0.6, 0, 0.6].forEach((dx) => {
     const shade = mesh(new THREE.CylinderGeometry(0.05, 0.18, 0.2, 20), materials.pendant, false);
-    shade.position.set(pendantX + dx, 1.75, pendantZ);
-    group.add(shade, box(0.01, HEIGHT - 1.85, 0.01, materials.trim, pendantX + dx, 1.85 + (HEIGHT - 1.85) / 2, pendantZ, false));
+    shade.position.set(dining.x + dx, 1.75, dining.z);
+    group.add(shade, box(0.01, HEIGHT - 1.85, 0.01, materials.trim, dining.x + dx, 1.85 + (HEIGHT - 1.85) / 2, dining.z, false));
   });
-  const pendantLight = new THREE.PointLight(0xffd29a, 0, 6, 1.6);
-  pendantLight.position.set(pendantX, 1.6, pendantZ);
-  group.add(pendantLight);
+  const light = new THREE.PointLight(0xffd29a, 0, 6, 1.6);
+  light.position.set(dining.x, 1.6, dining.z);
+  group.add(light);
+  return light;
+}
 
-  return { group, walls, size: { w, h }, pendantLight };
+/**
+ * @returns {{ group: THREE.Group, walls: THREE.Group[], size: {w: number, h: number}, pendantLight: THREE.PointLight }}
+ */
+export function buildInterior(config, derived, materials) {
+  const room = derived.plan.floors[0].rooms.find((r) => r.kind === 'living');
+  const size = { w: room.w, h: room.h };
+  const group = new THREE.Group();
+  group.name = 'innenraum';
+  // Durchgang zur Diele links neben der Küchenzeile (Rückwand ist um 180° gedreht: lokal x = −Welt-x)
+  const doorWorldX = size.w / 2 - 4.2;
+  const door = { kind: 'door', x: -doorWorldX, y: 0, width: 0.95, height: config.tallDoors ? 2.5 : 2.05 };
+  const walls = roomWalls(size, roomOpenings(derived, room), door, materials, materials.frame(config.frame));
+  equipWalls(walls, door, config, materials);
+  group.add(...walls, roomFloor(size, config, materials));
+  const dining = furnish(group, size, config, materials);
+  const pendantLight = pendants(group, dining, materials);
+  return { group, walls, size, pendantLight };
 }
 
 /** Blendet die Wände zwischen Kamera und Raum aus (Puppenhaus-Effekt). */

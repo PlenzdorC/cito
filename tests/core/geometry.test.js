@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { MODELS, PV_PACKAGES } from '../../src/data/catalog.js';
 import { createDefaultConfig } from '../../src/core/config.js';
 import {
-  dimensionSummary,
   fitFlatRoof,
   fitPitchedPlane,
   houseGeometry,
@@ -66,11 +65,6 @@ describe('houseGeometry', () => {
     const geo = houseGeometry(one);
     expect(roofUndersideAt(geo, 0, geo.outer.depth / 2)).toBeCloseTo(geo.eavesHeight, 6);
     expect(roofUndersideAt(geo, 0, -geo.outer.depth / 2)).toBeCloseTo(geo.eavesHeight + geo.roof.rise, 6);
-  });
-
-  it('summarises dimensions for the viewport', () => {
-    const geo = houseGeometry(one);
-    expect(dimensionSummary(geo)).toEqual({ width: geo.outer.width, depth: geo.outer.depth, height: geo.totalHeight });
   });
 });
 

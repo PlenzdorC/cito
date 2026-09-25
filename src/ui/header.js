@@ -54,28 +54,30 @@ export function header(state, actions) {
         <span class="flex flex-col leading-none">
           <span class="flex items-center gap-1.5">
             <span class="text-headline-sm font-extrabold tracking-tight text-primary uppercase">Citodomus</span>
-            <span class="rounded-full bg-tertiary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-tertiary">3D Planer</span>
+            <span class="hidden rounded-full bg-tertiary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-tertiary min-[400px]:inline"
+              >3D Planer</span
+            >
           </span>
           <span class="mt-1 hidden text-label-tech text-on-surface-variant sm:block">In 6 Monaten zuhause.</span>
         </span>
       </a>
       ${state.partner
-        ? html`<span class="hidden items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-label-tech text-on-surface md:flex">
+        ? html`<span class="hidden items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-label-tech whitespace-nowrap text-on-surface md:flex">
             <span class="size-2 rounded-full bg-tertiary"></span> Partner ${state.partner}
           </span>`
         : html`<span class="hidden items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-label-tech text-on-surface 2xl:flex">
             ${icon('verified', { size: 16, className: 'text-tertiary' })} Modulare Präzision
           </span>`}
       <div class="hidden flex-1 justify-center lg:flex">${stepNav(state, actions)}</div>
-      <div class="flex shrink-0 items-center gap-2">
-        <button type="button" class="btn btn-secondary !gap-2 !py-1.5 !pr-3.5 !pl-1.5" @click=${actions.openCito}>
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <button type="button" class="btn btn-secondary !gap-2 !p-1 sm:!py-1.5 sm:!pr-3.5 sm:!pl-1.5" aria-label="Frage an Cito" @click=${actions.openCito}>
           <img src=${CITO_AVATARS.wave} alt="" width="28" height="28" class="size-7 rounded-full object-cover" />
-          <span class="hidden sm:inline">Frage an Cito</span>
+          <span class="hidden sm:inline" aria-hidden="true">Frage an Cito</span>
         </button>
         <button type="button" class="icon-btn" title="Teilen & Einbetten" aria-label="Teilen & Einbetten" @click=${actions.openShare}>
           ${icon('share', { size: 18 })}
         </button>
-        <button type="button" class="icon-btn" title="Konfiguration speichern" aria-label="Konfiguration speichern" @click=${actions.saveConfig}>
+        <button type="button" class="icon-btn hidden sm:inline-flex" title="Konfiguration speichern" aria-label="Konfiguration speichern" @click=${actions.saveConfig}>
           ${icon('bookmark', { size: 18 })}
         </button>
       </div>

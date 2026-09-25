@@ -228,12 +228,3 @@ export function referenceGeometry() {
   }
   return referenceCache;
 }
-
-/** Maßangaben für die Anzeige im Viewport. */
-export function dimensionSummary(geo) {
-  return {
-    width: geo.outer.width,
-    depth: geo.outer.depth,
-    height: geo.totalHeight,
-  };
-}

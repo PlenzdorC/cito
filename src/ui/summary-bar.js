@@ -9,10 +9,12 @@ export function summaryBar(state, derived, actions) {
     <div class="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-8 lg:py-3">
       <div class="flex min-w-0 items-center gap-4 lg:gap-6">
         <div class="flex min-w-0 flex-col">
-          <span class="text-label-tech text-on-surface-variant uppercase">Geschätzter Gesamtpreis</span>
-          <span class="flex items-baseline gap-1.5">
-            <span class="text-price-md text-on-surface tabular-nums sm:text-price-xl">${formatEuro(breakdown.total)}</span>
-            <span class="text-label-tech font-bold text-tertiary">inkl. MwSt.</span>
+          <span class="text-label-tech whitespace-nowrap text-on-surface-variant uppercase">
+            <span class="hidden sm:inline">Geschätzter </span>Gesamtpreis
+          </span>
+          <span class="flex flex-wrap items-baseline gap-x-1.5">
+            <span class="text-price-md whitespace-nowrap text-on-surface tabular-nums sm:text-price-xl">${formatEuro(breakdown.total)}</span>
+            <span class="text-label-tech font-bold whitespace-nowrap text-tertiary">inkl. MwSt.</span>
           </span>
         </div>
         <div class="hidden flex-col border-l border-surface-container pl-4 xl:flex lg:pl-6">

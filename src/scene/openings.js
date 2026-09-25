@@ -59,7 +59,7 @@ function windowUnit(o, t, config, materials) {
     // Außenfensterbank
     group.add(boxAt(o.width + 0.08, 0.03, INSET + 0.06, materials.trim, o.x, o.y - 0.015, t - INSET / 2 + 0.03));
   }
-  if (config.raffstore && o.kind !== 'sidelight') {
+  if (config.raffstore && o.kind !== 'sidelight' && o.roomId !== 'dachraum') {
     const drop = o.height * 0.28;
     group.add(boxAt(o.width, 0.12, 0.1, materials.trim, o.x, o.y + o.height - 0.06, t - 0.06));
     const lamella = boxAt(o.width - 0.02, drop, 0.02, materials.lamella, o.x, o.y + o.height - 0.12 - drop / 2, t - 0.07, false);

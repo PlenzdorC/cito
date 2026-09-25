@@ -101,7 +101,7 @@ export function buildSite(config, geo, plan, openings, materials) {
       const box = mesh(new THREE.BoxGeometry(0.34, 0.46, 0.14), materials.appliance);
       box.position.copy(wallToWorld(frame, carX + 1.25, 1.25, t + 0.07));
       box.rotation.y = frame.rotationY;
-      const lamp = mesh(new THREE.BoxGeometry(0.16, 0.03, 0.02), materials.screen, { cast: false });
+      const lamp = mesh(new THREE.BoxGeometry(0.16, 0.03, 0.02), materials.statusLed, { cast: false });
       lamp.position.copy(wallToWorld(frame, carX + 1.25, 1.36, t + 0.145));
       lamp.rotation.y = frame.rotationY;
       group.add(box, lamp);

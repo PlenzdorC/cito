@@ -1,10 +1,11 @@
 import { html, nothing } from 'lit-html';
-import { CONSULTATION_OPTIONS, PLOT_OPTIONS } from '../../services/lead.js';
+import { CONSULTATION_OPTIONS, PLOT_OPTIONS, emptyLeadForm } from '../../services/lead.js';
 import { icon } from '../icons.js';
 
 /** Anfrageformular „Für Bauherren“ – unkontrollierte Felder, Validierung beim Absenden. */
 
-const privacyUrl = import.meta.env?.VITE_PRIVACY_URL || '';
+const privacyUrl = import.meta.env.VITE_PRIVACY_URL || '';
+const DEFAULTS = emptyLeadForm();
 
 function field({ id, name, label, type = 'text', required = false, autocomplete = 'off', placeholder = '', error, inputmode }) {
   const errorId = `${id}-error`;
@@ -79,8 +80,8 @@ export function leadForm(state, derived, actions) {
       <legend class="mb-1 text-label-tech text-on-surface-variant">Grundstück</legend>
       <div class="grid grid-cols-3 gap-1.5">
         ${PLOT_OPTIONS.map(
-          (option, index) => html`<label class="segment grid place-items-center px-2 py-2 text-center text-body-sm font-semibold">
-            <input class="sr-only" type="radio" name="plot" value=${option.id} ?checked=${index === 1} />
+          (option) => html`<label class="segment grid place-items-center px-2 py-2 text-center text-body-sm font-semibold">
+            <input class="sr-only" type="radio" name="plot" value=${option.id} ?checked=${option.id === DEFAULTS.plot} />
             ${option.label}
           </label>`,
         )}
@@ -91,9 +92,9 @@ export function leadForm(state, derived, actions) {
       <legend class="mb-1 text-label-tech text-on-surface-variant">Gewünschte Beratung</legend>
       <div class="grid grid-cols-2 gap-1.5">
         ${CONSULTATION_OPTIONS.map(
-          (option, index) => html`<label class="segment flex items-center gap-2 px-3 py-2 text-body-sm font-semibold">
-            <input class="sr-only" type="radio" name="consultation" value=${option.id} ?checked=${index === 0} />
-            ${index === 0 ? icon('videocam', { size: 18 }) : icon('holiday_village', { size: 18 })} ${option.label}
+          (option) => html`<label class="segment flex items-center gap-2 px-3 py-2 text-body-sm font-semibold">
+            <input class="sr-only" type="radio" name="consultation" value=${option.id} ?checked=${option.id === DEFAULTS.consultation} />
+            ${option.id === 'video' ? icon('videocam', { size: 18 }) : icon('holiday_village', { size: 18 })} ${option.label}
           </label>`,
         )}
       </div>

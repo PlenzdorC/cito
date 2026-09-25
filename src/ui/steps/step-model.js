@@ -115,8 +115,10 @@ function floorsControl(config, derived, actions) {
             @change=${() => actions.setOptions({ floors: option.floors })}
           />
           ${option.floors === 1 ? icon('looks_one', { size: 18 }) : icon('looks_two', { size: 18 })}
-          <span class="flex-1">${option.label}</span>
-          ${surcharge ? html`<span class="tabular-nums opacity-80">${formatDelta(surcharge)}</span>` : nothing}
+          <span class="flex min-w-0 flex-col leading-tight">
+            <span>${option.label}</span>
+            ${surcharge ? html`<span class="text-[11px] font-semibold whitespace-nowrap tabular-nums opacity-80">${formatDelta(surcharge)}</span>` : nothing}
+          </span>
         </label>`;
       })}
     </div>

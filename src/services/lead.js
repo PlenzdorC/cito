@@ -91,7 +91,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * Sendet die Anfrage. Wirft bei Netzwerk- oder Serverfehlern eine verständliche Fehlermeldung.
  * @returns {Promise<{ ok: true, demo: boolean, reference: string }>}
  */
-export async function submitLead(payload, { endpoint = import.meta.env?.VITE_LEAD_ENDPOINT, fetchImpl = globalThis.fetch, demoDelay = 700 } = {}) {
+export async function submitLead(payload, { endpoint = import.meta.env.VITE_LEAD_ENDPOINT, fetchImpl = globalThis.fetch, demoDelay = 700 } = {}) {
   if (!endpoint) {
     await wait(demoDelay);
     return { ok: true, demo: true, reference: payload.configId };

@@ -22,7 +22,8 @@ export function createViewer(host, { reducedMotion = false, onInteract = () => {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NeutralToneMapping ?? THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // PCFSoftShadowMap existiert seit r18x nicht mehr; weiche Kanten liefert shadow.radius
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.localClippingEnabled = true;
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.setAttribute('aria-hidden', 'true');

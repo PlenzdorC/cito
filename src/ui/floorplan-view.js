@@ -125,12 +125,12 @@ export function floorplanLayer(state, derived, actions) {
         >
       </div>
       ${plan.floors.length > 1
-        ? html`<div class="flex rounded-full bg-surface-container p-1" role="radiogroup" aria-label="Geschoss">
+        ? html`<div class="flex rounded-full bg-surface-container p-1" role="group" aria-label="Geschoss">
             ${plan.floors.map(
               (f, i) => html`<button
                 type="button"
-                role="radio"
-                aria-checked=${i === level}
+                aria-pressed=${i === level ? 'true' : 'false'}
+                aria-label=${f.label}
                 class="rounded-full px-3 py-1 text-label-strong ${i === level ? 'bg-primary text-on-primary' : 'text-on-surface-variant'}"
                 @click=${() => actions.setPlanLevel(i)}
               >

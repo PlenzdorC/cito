@@ -139,9 +139,3 @@ export function facadeOpenings(config, geo = houseGeometry(config), plan = layou
   });
   return openings;
 }
-
-/** Die Wand, an der sich die Haustür befindet (für Vordach, SmartScan & Kamera). */
-export function entranceInfo(config, geo = houseGeometry(config), openings = facadeOpenings(config, geo)) {
-  const door = openings.find((o) => o.kind === 'door');
-  return door ? { wall: door.wall, x: door.x, width: door.width, height: door.height } : null;
-}

@@ -5,12 +5,31 @@ import { buildSection, sectionPlane } from './section.js';
 import { buildSite } from './site.js';
 import { buildWalls } from './walls.js';
 
+/** Dekorative Giebelfenster beim Satteldach (Dachraum, nicht Teil des Grundrisses). */
+function gableWindows(geo) {
+  if (geo.roof.type !== 'sattel' || geo.roof.rise < 1.8) return [];
+  const size = Math.min(1.0, geo.roof.rise * 0.4);
+  return ['S', 'N'].map((wall) => ({
+    id: `giebel-${wall}`,
+    wall,
+    kind: 'standard',
+    roomId: 'dachraum',
+    floor: geo.floors - 1,
+    x: geo.outer.width / 2,
+    y: geo.eavesHeight + geo.roof.rise * 0.22,
+    width: size,
+    height: size,
+    panes: 1,
+  }));
+}
+
 /**
  * Setzt das komplette Außenmodell aus der Konfiguration zusammen.
  * Hotspot-Anker enthalten Weltposition und Flächennormale (für die Sichtbarkeitsprüfung).
  */
 export function buildHouse(config, derived, materials) {
-  const { geo, plan, openings } = derived;
+  const { geo, plan } = derived;
+  const openings = [...derived.openings, ...gableWindows(geo)];
   const group = new THREE.Group();
   group.name = 'haus';
 

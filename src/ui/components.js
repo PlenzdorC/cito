@@ -171,6 +171,3 @@ export function guaranteeBadge({ compact = false } = {}) {
     </span>
   </div>`;
 }
-
-/** Visuell verstecktes Label für Screenreader. */
-export const srOnly = (text) => html`<span class="sr-only">${text}</span>`;

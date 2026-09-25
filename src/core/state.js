@@ -1,5 +1,5 @@
-import { FINANCING } from '../data/catalog.js';
 import { applyModel, createDefaultConfig, updateConfig } from './config.js';
+import { maxEquity, priceBreakdown } from './pricing.js';
 
 /** Standardansicht je Schritt: in Schritt 4 zeigt der Viewport den Innenraum. */
 export const STEP_VIEWS = Object.freeze({ 1: 'exterior', 2: 'exterior', 3: 'exterior', 4: 'interior', 5: 'exterior' });
@@ -41,13 +41,10 @@ export function createInitialState({ config = createDefaultConfig(), step = 1, p
     viewerStatus: 'loading',
     fullscreen: false,
     interacted: false,
-    print: null,
   };
 }
 
 export const markInteracted = (state) => (state.interacted ? state : { ...state, interacted: true });
-
-export const setPrint = (state, print) => ({ ...state, print });
 
 /** Status des 3D-Viewers: loading | ready | unsupported | error. Ohne WebGL bleibt der 2D-Grundriss. */
 export function setViewerStatus(state, viewerStatus) {
@@ -58,10 +55,14 @@ export function setViewerStatus(state, viewerStatus) {
 
 export const setFullscreen = (state, fullscreen) => (fullscreen === state.fullscreen ? state : { ...state, fullscreen });
 
+/** Eigenkapital darf nach Preisänderungen nie über dem neuen Maximum liegen. */
+const clampEquity = (equity, config) => Math.min(equity, maxEquity(priceBreakdown(config).total));
+
 function withConfig(state, { config, notices }) {
   return {
     ...state,
     config,
+    equity: clampEquity(state.equity, config),
     notices,
     noticeSeq: notices.length > 0 ? state.noticeSeq + 1 : state.noticeSeq,
   };
@@ -90,8 +91,7 @@ export function setSunTime(state, hour) {
 
 /** Eigenkapital zwischen 0 und dem maximalen Anteil am Gesamtpreis. */
 export function setEquity(state, equity, total) {
-  const max = Math.floor((total * FINANCING.maxEquityShare) / FINANCING.equityStep) * FINANCING.equityStep;
-  const value = Math.min(max, Math.max(0, Math.round(Number(equity) || 0)));
+  const value = Math.min(maxEquity(total), Math.max(0, Math.round(Number(equity) || 0)));
   return value === state.equity ? state : { ...state, equity: value };
 }
 
@@ -129,4 +129,4 @@ export function resetConfiguration(state) {
   };
 }
 
-export const loadConfiguration = (state, config) => ({ ...state, config, notices: [] });
+export const loadConfiguration = (state, config) => ({ ...state, config, equity: clampEquity(state.equity, config), notices: [] });

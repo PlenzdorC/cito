@@ -2,6 +2,7 @@ import { html, nothing } from 'lit-html';
 import { FINANCING, MODELS } from '../../data/catalog.js';
 import { EXCLUDED_SERVICES, INCLUDED_SERVICES } from '../../data/content.js';
 import { formatDelta, formatEuro, formatMonthly, formatNumber } from '../../core/format.js';
+import { maxEquity } from '../../core/pricing.js';
 import { pill } from '../components.js';
 import { icon } from '../icons.js';
 import { leadForm } from './lead-form.js';
@@ -30,7 +31,7 @@ function summaryHeader(state, derived) {
 
 function financing(state, derived, actions) {
   const total = derived.breakdown.total;
-  const max = Math.floor((total * FINANCING.maxEquityShare) / FINANCING.equityStep) * FINANCING.equityStep;
+  const max = maxEquity(total);
   const fill = max > 0 ? (state.equity / max) * 100 : 0;
   return html`<div class="flex flex-col gap-2 rounded-xl border border-line p-3.5">
     <div class="flex items-center justify-between">

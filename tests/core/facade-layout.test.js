@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MODELS } from '../../src/data/catalog.js';
 import { createDefaultConfig } from '../../src/core/config.js';
-import { canonicalToWorld, edgeWall, entranceInfo, facadeOpenings, wallLength, wallLocalX } from '../../src/core/facade-layout.js';
+import { canonicalToWorld, edgeWall, facadeOpenings, wallLength, wallLocalX } from '../../src/core/facade-layout.js';
 import { houseGeometry, roofUndersideAt } from '../../src/core/geometry.js';
 
 const one = createDefaultConfig('one');
@@ -52,8 +52,9 @@ describe('coordinate helpers', () => {
 
 describe('facadeOpenings', () => {
   it('has exactly one front door on the entrance wall', () => {
-    expect(entranceInfo(one).wall).toBe('E');
-    expect(entranceInfo({ ...one, roof: 'sattel' }).wall).toBe('S');
+    const doorWall = (config) => facadeOpenings(config).find((o) => o.kind === 'door').wall;
+    expect(doorWall(one)).toBe('E');
+    expect(doorWall({ ...one, roof: 'sattel' })).toBe('S');
     variants().forEach((config) => {
       const doors = facadeOpenings(config).filter((o) => o.kind === 'door');
       expect(doors).toHaveLength(1);

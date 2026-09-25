@@ -1,24 +1,30 @@
 import * as THREE from 'three';
+import { wallLength } from '../core/facade-layout.js';
 
 /**
  * Lokale Koordinatensysteme der vier Außenwände.
  * Wandlokal: x von außen gesehen nach rechts (ab Außenecke), y nach oben, z von der Innen- (0) zur Außenfläche (t).
+ * Ost- und Westwand stehen zwischen Nord- und Südwand (Ecken gehören zu N/S).
  */
 
-export function wallFrame(geo, wall) {
+function framePose(geo, wall) {
   const W = geo.outer.width;
   const D = geo.outer.depth;
   const t = geo.wallThickness;
   switch (wall) {
     case 'S':
-      return { rotationY: 0, position: new THREE.Vector3(-W / 2, 0, D / 2 - t), normal: new THREE.Vector3(0, 0, 1), length: W, shortened: false };
+      return { rotationY: 0, position: new THREE.Vector3(-W / 2, 0, D / 2 - t), normal: new THREE.Vector3(0, 0, 1) };
     case 'N':
-      return { rotationY: Math.PI, position: new THREE.Vector3(W / 2, 0, -D / 2 + t), normal: new THREE.Vector3(0, 0, -1), length: W, shortened: false };
+      return { rotationY: Math.PI, position: new THREE.Vector3(W / 2, 0, -D / 2 + t), normal: new THREE.Vector3(0, 0, -1) };
     case 'E':
-      return { rotationY: Math.PI / 2, position: new THREE.Vector3(W / 2 - t, 0, D / 2), normal: new THREE.Vector3(1, 0, 0), length: D, shortened: true };
+      return { rotationY: Math.PI / 2, position: new THREE.Vector3(W / 2 - t, 0, D / 2), normal: new THREE.Vector3(1, 0, 0) };
     default:
-      return { rotationY: -Math.PI / 2, position: new THREE.Vector3(-W / 2 + t, 0, -D / 2), normal: new THREE.Vector3(-1, 0, 0), length: D, shortened: true };
+      return { rotationY: -Math.PI / 2, position: new THREE.Vector3(-W / 2 + t, 0, -D / 2), normal: new THREE.Vector3(-1, 0, 0) };
   }
+}
+
+export function wallFrame(geo, wall) {
+  return { ...framePose(geo, wall), length: wallLength(geo, wall) };
 }
 
 /** Wandlokaler Punkt → Weltkoordinate. */

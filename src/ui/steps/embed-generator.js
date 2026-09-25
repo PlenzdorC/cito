@@ -6,7 +6,7 @@ import { icon } from '../icons.js';
 /** Embed-Code-Generator „Für Partner / Webseiten“. */
 
 const FALLBACK_BASE_URL = 'https://citodomus.de/konfigurator/';
-const embedBase = () => import.meta.env?.VITE_EMBED_BASE_URL || currentBaseUrl() || FALLBACK_BASE_URL;
+const embedBase = () => import.meta.env.VITE_EMBED_BASE_URL || currentBaseUrl() || FALLBACK_BASE_URL;
 
 function input({ id, label, value, error, onInput, className = '' }) {
   return html`<div class="flex flex-col gap-1">

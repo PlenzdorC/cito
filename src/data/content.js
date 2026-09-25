@@ -1,6 +1,6 @@
 /** Redaktionelle Inhalte: Cito-Avatare, FAQ, Bauablauf und Leistungsumfang. */
 
-const asset = (file) => `${import.meta.env?.BASE_URL ?? './'}cito/${file}`;
+const asset = (file) => `${import.meta.env.BASE_URL ?? './'}cito/${file}`;
 
 export const CITO_AVATARS = Object.freeze({
   builder: asset('cito-builder.jpg'),

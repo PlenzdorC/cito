@@ -1,6 +1,6 @@
 import { html, nothing } from 'lit-html';
 import { FRAMES, MODELS, PV_PACKAGES, ROOFS } from '../data/catalog.js';
-import { compassLabel, pvPowerAt, sunPosition, SUNRISE } from '../core/energy.js';
+import { compassLabel, pvPowerAt, SOLAR_NOON, sunPosition, SUNRISE } from '../core/energy.js';
 import { formatClock, formatKwh, formatMeters, formatNumber } from '../core/format.js';
 import { lineItems } from '../core/pricing.js';
 import { SUN_MAX, SUN_MIN } from '../core/state.js';
@@ -69,7 +69,7 @@ function topBadges(state, derived) {
     <span class="glass-dark flex items-center gap-1.5 rounded-full px-3 py-1.5 text-label-tech shadow-sm">
       ${icon('view_in_ar', { size: 16, className: 'text-tertiary-fixed' })} ${model.shortName} · ${state.config.area} m²
     </span>
-    <span class="flex items-center gap-1 rounded-full bg-tertiary-container/90 px-3 py-1.5 text-label-tech text-on-tertiary shadow-sm backdrop-blur-md">
+    <span class="hidden items-center gap-1 rounded-full bg-tertiary-container/90 px-3 py-1.5 text-label-tech text-on-tertiary shadow-sm backdrop-blur-md sm:flex">
       ${icon('bolt', { size: 16 })} ${derived.standard.plus ? 'Effizienzhaus 40 Plus' : 'KfW 40 QNG Standard'}
     </span>
     ${labels[state.view]
@@ -97,14 +97,13 @@ function controls(state, actions) {
 
 function viewDock(state, actions) {
   const disabled3d = state.viewerStatus !== 'ready';
-  return html`<div class="glass pointer-events-auto flex items-center gap-1 rounded-full p-1" role="radiogroup" aria-label="Ansicht">
+  return html`<div class="glass pointer-events-auto flex items-center gap-1 rounded-full p-1" role="group" aria-label="Ansicht">
     ${VIEW_OPTIONS.map((v) => {
       const active = state.view === v.id;
       const disabled = v.id !== 'floorplan' && disabled3d;
       return html`<button
         type="button"
-        role="radio"
-        aria-checked=${active}
+        aria-pressed=${active ? 'true' : 'false'}
         ?disabled=${disabled}
         class="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-label-tech transition-colors disabled:opacity-40 ${active
           ? 'bg-primary text-on-primary'
@@ -121,7 +120,7 @@ function sunPanel(state, derived, actions) {
   const sun = sunPosition(state.sunTime);
   const power = pvPowerAt(state.sunTime, state.config);
   const direction = compassLabel(sun.azimuth);
-  const peak = Math.abs(state.sunTime - 13.25) < 0.6;
+  const peak = Math.abs(state.sunTime - SOLAR_NOON) < 0.6;
   const fill = ((state.sunTime - SUN_MIN) / (SUN_MAX - SUN_MIN)) * 100;
   return html`<div class="glass pointer-events-auto flex w-full flex-col gap-2 rounded-xl p-2.5 md:flex-row md:items-center md:gap-4">
     <div class="flex min-w-0 flex-1 items-center gap-2">
