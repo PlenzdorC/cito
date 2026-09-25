@@ -169,7 +169,7 @@ function dimensionPill(derived) {
 
 function statusLayer(state) {
   if (state.viewerStatus === 'loading') {
-    return html`<div class="absolute inset-0 grid place-items-center" aria-live="polite">
+    return html`<div class="pointer-events-none absolute inset-0 grid place-items-center" aria-live="polite">
       <div class="skeleton-pulse flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-label-strong text-on-surface-variant shadow-lift">
         ${icon('progress_activity', { size: 18, className: 'animate-spin text-primary' })} 3D-Modell wird geladen …
       </div>
@@ -190,7 +190,7 @@ export function viewport(state, derived, actions) {
   const exterior = state.view === 'exterior' && state.viewerStatus === 'ready';
   return html`<div class="viewport-wrap">
     <div
-      class="viewport group"
+      class="viewport group select-none"
       id="viewport"
       data-lighting=${state.lighting}
       data-view=${state.view}
@@ -200,7 +200,8 @@ export function viewport(state, derived, actions) {
     >
       <div class="viewport-canvas" id="viewport-canvas" ?hidden=${!showCanvas}></div>
       ${showCanvas ? html`<div class="viewport-vignette"></div>` : floorplanLayer(state, derived, actions)}
-      <div class="absolute inset-0 overflow-hidden" id="hotspot-layer">${hotspots(state, actions)}</div>
+      <!-- Vollflächige Overlays müssen mausdurchlässig sein, sonst erreicht das Ziehen die 3D-Steuerung nicht -->
+      <div class="pointer-events-none absolute inset-0 overflow-hidden" id="hotspot-layer">${hotspots(state, actions)}</div>
       ${topBadges(state, derived)} ${controls(state, actions)} ${statusLayer(state)}
       <div class="pointer-events-none absolute right-3 bottom-3 left-3 z-10 flex flex-col gap-2 lg:right-4 lg:bottom-4 lg:left-4">
         ${state.step === 3 && exterior ? sunPanel(state, derived, actions) : nothing}

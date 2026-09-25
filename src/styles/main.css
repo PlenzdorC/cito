@@ -310,6 +310,8 @@
     left: 0;
     top: 0;
     z-index: 5;
+    /* Die Hotspot-Ebene ist mausdurchlässig – nur die Pins selbst sind klickbar */
+    pointer-events: auto;
     will-change: transform;
     transition: opacity 0.25s ease;
   }

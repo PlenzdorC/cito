@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render } from 'lit-html';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createActions } from '../../src/app/actions.js';
@@ -202,6 +204,24 @@ describe('Konfigurator-Oberfläche', () => {
     expect(app.$('#viewport').textContent).toContain('Eltern');
     const exterior = app.$$('#viewport [aria-label="Ansicht"] button').find((b) => b.textContent.includes('3D Außen'));
     expect(exterior.disabled).toBe(true); // ohne 3D-Viewer (jsdom) nur Grundriss verfügbar
+  });
+
+  it('lässt Mausereignisse zur 3D-Steuerung durch (Overlays blockieren das Drehen nicht)', () => {
+    app.store.setState((s) => ({ ...s, viewerStatus: 'ready' }));
+    [1, 2, 3, 4, 5].forEach((step) => {
+      app.actions.goToStep(step);
+      // Alle vollflächigen Ebenen über dem Canvas müssen pointer-events: none haben
+      const overlays = app.$$('#viewport > .inset-0, #viewport > .inset-x-0').filter((el) => el.id !== 'viewport-canvas');
+      expect(overlays.length).toBeGreaterThan(0);
+      overlays.forEach((el) => {
+        const passThrough = el.classList.contains('pointer-events-none') || el.classList.contains('viewport-vignette');
+        expect(passThrough, `Schritt ${step}: ${el.id || el.className}`).toBe(true);
+      });
+    });
+    // Die Pins selbst bleiben klickbar (CSS: .hotspot { pointer-events: auto })
+    const css = readFileSync(join(import.meta.dirname, '..', '..', 'src', 'styles', 'main.css'), 'utf8');
+    expect(css).toMatch(/\.hotspot \{[^}]*pointer-events: auto/);
+    expect(css).toMatch(/\.viewport-vignette \{[^}]*pointer-events: none/);
   });
 
   it('rendert Hotspots nur mit bereitem 3D-Viewer', () => {
