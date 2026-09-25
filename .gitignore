@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+release/
+*.local
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store
+Thumbs.db
+apps/desktop/out/
+apps/desktop/web/
+apps/server/data/
+playwright-report/
+test-results/
