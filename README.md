@@ -88,15 +88,17 @@ Der Endpunkt sollte optional `{ "reference": "…" }` zurückgeben (wird dem Kun
 
 ## Einbindung in eine andere Website
 
-Zwei Wege, beide mit lauffähiger Beispielseite in `beispiele/` (bei `npm run dev` unter
-`http://localhost:5173/beispiele/einbettung-iframe.html` bzw. `…/aufruf-mit-ruecksprung.html`):
+Zwei Wege, beide mit lauffähiger Beispielseite in `public/beispiele/`. Die Seiten werden mit ausgeliefert
+(`/beispiele/einbettung-iframe.html` bzw. `/beispiele/aufruf-mit-ruecksprung.html`, lokal unter `http://localhost:5173/…`)
+und sind per `noindex` von Suchmaschinen ausgenommen:
 
 | Variante | Beispiel | Wann |
 | --- | --- | --- |
-| 1 · Einbettung per iFrame | `beispiele/einbettung-iframe.html` | Konfigurator als Abschnitt der Seite, kein Seitenwechsel |
-| 2 · Aufruf mit Rücksprung | `beispiele/aufruf-mit-ruecksprung.html` | Link öffnet den Konfigurator im Vollbild, „Zurück“ führt mit Ergebnis zur Seite |
+| 1 · Einbettung per iFrame | `public/beispiele/einbettung-iframe.html` | Konfigurator als Abschnitt der Seite, kein Seitenwechsel |
+| 2 · Aufruf mit Rücksprung | `public/beispiele/aufruf-mit-ruecksprung.html` | Link öffnet den Konfigurator im Vollbild, „Zurück“ führt mit Ergebnis zur Seite |
 
-Die Beispielseiten gehören nicht zum Build (`dist/`); die markierten Blöcke lassen sich übernehmen.
+Die markierten Blöcke lassen sich in die eigene Seite übernehmen. Sollen die Beispiele nicht öffentlich erreichbar
+sein, den Ordner vor dem Build entfernen.
 
 ### Variante 1 – Einbettung per iFrame (auch für Partner-Websites)
 
