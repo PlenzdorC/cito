@@ -19,7 +19,7 @@ export function appTemplate(state, derived, actions) {
       >Zu den Konfigurationsoptionen springen</a
     >
     <div class="app-shell" data-step=${state.step} data-embed=${state.embed}>
-      ${header(state, actions)}
+      ${header(state, derived, actions)}
       <main class="app-main" id="main">
         <section class="stage" aria-label="Visualisierung und Kennzahlen">
           ${viewport(state, derived, actions)} ${contextDeck(state, derived, actions)}

@@ -5,6 +5,7 @@ import { icon } from './icons.js';
 /** Live-Kalkulationsleiste (DESIGN.md: „Live Calculation Summary Bar“). */
 export function summaryBar(state, derived, actions) {
   const { breakdown } = derived;
+  const sending = state.lead.status === 'sending';
   return html`<footer class="summary-bar" id="summary-bar">
     <div class="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-8 lg:py-3">
       <div class="flex min-w-0 items-center gap-4 lg:gap-6">
@@ -35,10 +36,10 @@ export function summaryBar(state, derived, actions) {
         <button type="button" class="btn btn-secondary hidden md:inline-flex" @click=${actions.printExpose}>
           ${icon('download', { size: 18 })} PDF Exposé
         </button>
-        <button type="button" class="btn btn-primary" @click=${actions.requestOffer}>
+        <button type="button" class="btn btn-primary" ?disabled=${sending} @click=${actions.requestOffer}>
           <span class="hidden lg:inline">Jetzt Traumhaus unverbindlich anfragen</span>
           <span class="lg:hidden">Anfragen</span>
-          ${icon('arrow_forward', { size: 18 })}
+          ${sending ? icon('progress_activity', { size: 18, className: 'animate-spin' }) : icon('arrow_forward', { size: 18 })}
         </button>
       </div>
     </div>

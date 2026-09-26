@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit-html';
 import { CONSULTATION_OPTIONS, PLOT_OPTIONS, emptyLeadForm } from '../../services/lead.js';
 import { icon } from '../icons.js';
+import { returnTarget } from '../return-link.js';
 
 /** Anfrageformular „Für Bauherren“ – unkontrollierte Felder, Validierung beim Absenden. */
 
@@ -27,9 +28,10 @@ function field({ id, name, label, type = 'text', required = false, autocomplete 
   </div>`;
 }
 
-function successPanel(state, actions) {
+function successPanel(state, derived, actions) {
   const { lead } = state;
-  return html`<div class="fade-in flex flex-col items-start gap-3 rounded-xl bg-tertiary-fixed/35 p-4" role="status">
+  const back = returnTarget(state, derived);
+  return html`<div id="lead-success" tabindex="-1" class="fade-in flex flex-col items-start gap-3 rounded-xl bg-tertiary-fixed/35 p-4" role="status">
     <span class="grid size-11 place-items-center rounded-full bg-tertiary text-on-tertiary">${icon('mark_email_read', { size: 24 })}</span>
     <div class="flex flex-col gap-1">
       <span class="text-headline-sm text-on-surface">Vielen Dank${lead.name ? `, ${lead.name}` : ''}!</span>
@@ -43,16 +45,22 @@ function successPanel(state, actions) {
           </p>`
         : nothing}
     </div>
-    <button type="button" class="btn btn-quiet !py-2" @click=${actions.resetLead}>${icon('edit', { size: 18 })} Neue Anfrage</button>
+    <div class="flex flex-wrap gap-2">
+      ${back
+        ? html`<a class="btn btn-primary !py-2" href=${back.href}>${icon('arrow_back', { size: 18 })} Zurück zu ${back.host}</a>`
+        : nothing}
+      <button type="button" class="btn btn-quiet !py-2" @click=${actions.resetLead}>${icon('edit', { size: 18 })} Neue Anfrage</button>
+    </div>
   </div>`;
 }
 
 export function leadForm(state, derived, actions) {
   const { lead } = state;
-  if (lead.status === 'success') return successPanel(state, actions);
+  if (lead.status === 'success') return successPanel(state, derived, actions);
   const errors = lead.errors ?? {};
   const sending = lead.status === 'sending';
   return html`<form
+    id="lead-form"
     class="relative flex flex-col gap-3"
     novalidate
     aria-describedby="lead-intro"
@@ -129,7 +137,7 @@ export function leadForm(state, derived, actions) {
     </label>
 
     ${lead.error
-      ? html`<p class="flex items-start gap-2 rounded-lg bg-error-container p-3 text-body-sm text-on-error-container" role="alert">
+      ? html`<p id="lead-error" tabindex="-1" class="flex items-start gap-2 rounded-lg bg-error-container p-3 text-body-sm text-on-error-container" role="alert">
           ${icon('error', { size: 18 })} ${lead.error}
         </p>`
       : nothing}

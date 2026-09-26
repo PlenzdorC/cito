@@ -61,6 +61,7 @@ Umgebungsvariablen (siehe `.env.example`):
 | `VITE_LEAD_ENDPOINT` | URL, an die Anfragen per `POST` (JSON) gehen. Leer = Demo-Modus. |
 | `VITE_PRIVACY_URL` | Link zur Datenschutzerklärung im Formular. |
 | `VITE_EMBED_BASE_URL` | Öffentliche Adresse des Konfigurators für den Embed-Code. |
+| `VITE_RETURN_ORIGINS` | Weitere Ursprünge (Komma-getrennt), zu denen `?return=…` zurückführen darf. Der eigene Ursprung ist immer erlaubt. |
 
 Preise, Optionen und Texte: `src/data/catalog.js` (Katalog), `src/data/content.js` (FAQ, Fahrplan, Leistungsumfang).
 Die Beispielfinanzierung (Sollzins, Tilgung) steht ebenfalls im Katalog unter `FINANCING`.
@@ -85,7 +86,19 @@ Der Endpunkt sollte optional `{ "reference": "…" }` zurückgeben (wird dem Kun
 - die **Partner-Zuordnung prüfen**: `partner` stammt aus der URL und ist frei wählbar. Provisionen nur für
   registrierte Partner-IDs gutschreiben – idealerweise über ein serverseitig signiertes Partner-Token statt der Klartext-ID.
 
-## Einbettung auf Partner-Websites
+## Einbindung in eine andere Website
+
+Zwei Wege, beide mit lauffähiger Beispielseite in `beispiele/` (bei `npm run dev` unter
+`http://localhost:5173/beispiele/einbettung-iframe.html` bzw. `…/aufruf-mit-ruecksprung.html`):
+
+| Variante | Beispiel | Wann |
+| --- | --- | --- |
+| 1 · Einbettung per iFrame | `beispiele/einbettung-iframe.html` | Konfigurator als Abschnitt der Seite, kein Seitenwechsel |
+| 2 · Aufruf mit Rücksprung | `beispiele/aufruf-mit-ruecksprung.html` | Link öffnet den Konfigurator im Vollbild, „Zurück“ führt mit Ergebnis zur Seite |
+
+Die Beispielseiten gehören nicht zum Build (`dist/`); die markierten Blöcke lassen sich übernehmen.
+
+### Variante 1 – Einbettung per iFrame (auch für Partner-Websites)
 
 ```html
 <iframe src="https://ihre-domain.de/konfigurator/?embed=1&partner=MAKLER-42&accent=9D3E1A#m=one"
@@ -99,6 +112,35 @@ Der Endpunkt sollte optional `{ "reference": "…" }` zurückgeben (wird dem Kun
 | `partner` | Partner-ID (3–40 Zeichen, `A–Z`, `0–9`, `-`), wird der Anfrage beigefügt |
 | `accent` | Akzentfarbe als Hex ohne `#`; zu helle Farben werden für lesbaren Kontrast automatisch abgedunkelt |
 | `#…` | Start-Konfiguration (wie beim Teilen-Link) |
+
+### Variante 2 – Aufruf mit Rücksprung
+
+Die aufrufende Seite übergibt ihre eigene Adresse (URL-kodiert) in `return`; `partner` und `#…` funktionieren wie oben:
+
+```
+https://ihre-domain.de/konfigurator/?return=https%3A%2F%2Fwww.ihre-website.de%2Fhaeuser%2F#m=one
+```
+
+Der Konfigurator zeigt dann oben links „Zurück zu ihre-website.de“ und nach einer gesendeten Anfrage einen
+Zurück-Button. Beide führen zur Rücksprungadresse und hängen das Ergebnis an (eigene Parameter und Anker der Seite
+bleiben erhalten):
+
+```
+https://www.ihre-website.de/haeuser/?config=m%3Done%26fa%3Dholz&configId=CTD-2026-4K9QX&total=297250&lead=CTD-2026-4K9QX
+```
+
+| Parameter | Inhalt |
+| --- | --- |
+| `config` | Konfiguration im Format des Teilen-Links – als `#…` an die Konfigurator-Adresse gehängt, öffnet sie das Haus wieder |
+| `configId` | Konfigurations-ID |
+| `total` | Gesamtpreis in Euro (nur zur Anzeige) |
+| `lead` | nur nach gesendeter Anfrage: Vorgangsnummer des Anfrage-Endpunkts |
+
+- **Schutz vor Open Redirect:** Zurückgeführt wird nur auf `http(s)`-Adressen ohne Zugangsdaten auf dem eigenen
+  Ursprung des Konfigurators oder einem Ursprung aus `VITE_RETURN_ORIGINS`. Andere Werte werden ignoriert (kein
+  Zurück-Link). Im Embed-Modus (`embed=1`) gibt es keinen Rücksprung.
+- Die angehängten Werte sind auf der Zielseite nicht vertrauenswürdig: prüfen, nur als Text ausgeben, den Preis nicht
+  weiterverarbeiten. Verbindlich ist allein die Anfrage an `VITE_LEAD_ENDPOINT`.
 
 ## Betrieb
 
@@ -115,7 +157,7 @@ src/
   data/       Katalog (Preise, Optionen) und redaktionelle Inhalte
   core/       reine Logik: Regeln, Preise, Energie, Geometrie, Grundriss, Fassadenöffnungen,
               PV-Belegung, URL-Kodierung, Zustand – vollständig getestet
-  services/   Anfrage, Speicher, Einbettung
+  services/   Anfrage, Speicher, Einbettung, Rücksprung
   app/        Aktionen (Zustandsübergänge + Seiteneffekte) und Browser-Helfer
   ui/         lit-html-Templates: Header, Viewport-Overlays, fünf Schritt-Panels, Dialoge, Exposé
   scene/      three.js: Materialien, Wände, Öffnungen, Dach & PV, Außenanlage, Schnitt, Innenraum, Kamera

@@ -107,6 +107,12 @@ describe('state transitions', () => {
     expect(reset.config.facade).toBe('putz');
   });
 
+  it('keeps the return address of the calling page, also after a reset', () => {
+    expect(initial.returnTo).toBeNull();
+    const called = createInitialState({ returnTo: 'https://www.citodomus.example/haus' });
+    expect(resetConfiguration(called).returnTo).toBe('https://www.citodomus.example/haus');
+  });
+
   it('prefills the embed form with partner data from the URL', () => {
     const partnerState = createInitialState({ partner: 'MAKLER-42', accent: '#FFD400', embed: true });
     expect(partnerState.embedForm).toMatchObject({ partner: 'MAKLER-42', accent: '#FFD400' });

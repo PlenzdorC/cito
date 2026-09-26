@@ -10,6 +10,7 @@ import {
   prefersReducedMotion,
   safeLocalStorage,
   scrollToSection,
+  submitForm,
   toggleFullscreen,
 } from '../../src/app/browser.js';
 
@@ -76,6 +77,16 @@ describe('browser helpers', () => {
     focusFirstInvalid(null);
     scrollToSection('s');
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('submits forms through their submit handler', () => {
+    document.body.innerHTML = '<form id="f"></form><div id="d"></div>';
+    const onSubmit = vi.fn((event) => event.preventDefault());
+    document.getElementById('f').addEventListener('submit', onSubmit);
+    expect(submitForm('f')).toBe(true);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(submitForm('d')).toBe(false);
+    expect(submitForm('missing')).toBe(false);
   });
 
   it('toggles fullscreen safely', () => {

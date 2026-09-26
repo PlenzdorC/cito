@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beispiel 1: Konfigurator per iFrame eingebettet – CITODOMUS</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./beispiel-seite.css" />
+  </head>
+  <body>
+    <nav class="demo-bar" aria-label="Beispiel-Einbindungen">
+      <span class="demo-bar__label">Beispiel-Einbindung</span>
+      <a href="./einbettung-iframe.html" aria-current="page">1 · Einbettung per iFrame</a>
+      <a href="./aufruf-mit-ruecksprung.html">2 · Aufruf mit Rücksprung</a>
+    </nav>
+
+    <header class="site-header">
+      <span class="brand">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 3 3 13.5l2.4 2.9L16 7.7l10.6 8.7 2.4-2.9L25 10.2V5h-3.6v2.3Z" fill="#d96b43" />
+          <path d="M7.5 16.2 16 9.3l8.5 6.9V28h-6.2v-6.3h-4.6V28H7.5Z" fill="#2b2f33" />
+          <circle cx="13" cy="17" r="1.1" fill="#fff" />
+          <circle cx="19" cy="17" r="1.1" fill="#fff" />
+        </svg>
+        Citodomus
+      </span>
+      <span class="site-header__claim">In 6 Monaten zuhause.</span>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="titel">
+        <div>
+          <p class="eyebrow">3D-Hauskonfigurator</p>
+          <h1 id="titel">Plane dein Haus – direkt hier auf der Seite.</h1>
+          <p class="lead">
+            Modell wählen, Fassade und Dach gestalten, Ausstattung festlegen: Der Konfigurator ist in diese Seite eingebettet
+            und rechnet deinen Festpreis live mit. Deine Anfrage schickst du direkt von hier ab.
+          </p>
+        </div>
+        <ul class="facts">
+          <li><strong>5 Schritte</strong>vom Modell bis zur Anfrage</li>
+          <li><strong>Live-Festpreis</strong>inkl. Finanzierungsrate</li>
+          <li><strong>3D &amp; Grundriss</strong>jede Änderung sofort sichtbar</li>
+        </ul>
+      </section>
+
+      <!-- ================= CITODOMUS-Konfigurator · Einbettung per iFrame · Anfang ================= -->
+      <!-- Im Livebetrieb bei src die öffentliche Adresse eintragen, z. B.
+           https://ihre-domain.de/konfigurator/?embed=1 – hier läuft der Konfigurator im selben Projekt. -->
+      <style>
+        .citodomus-frame {
+          display: block;
+          width: 100%;
+          height: clamp(640px, calc(100dvh - 2rem), 820px);
+          border: 0;
+          border-radius: 16px;
+          box-shadow: 0 12px 32px -4px rgba(43, 47, 51, 0.12);
+        }
+      </style>
+      <iframe
+        class="citodomus-frame"
+        src="../?embed=1"
+        title="CITODOMUS 3D-Hauskonfigurator"
+        loading="lazy"
+        allow="fullscreen; clipboard-write"
+      ></iframe>
+      <!-- ================= CITODOMUS-Konfigurator · Einbettung per iFrame · Ende =================== -->
+
+      <p class="frame-note">
+        <span>Auf dem Smartphone geht’s im Vollbild bequemer:
+          <a href="../" target="_blank" rel="noopener">Konfigurator in neuem Tab öffnen</a></span>
+        <span>Kein Seitenwechsel nötig – Anfrage und Kalkulation laufen im Rahmen.</span>
+      </p>
+
+      <section class="dev" aria-labelledby="dev-titel">
+        <details>
+          <summary id="dev-titel">Für Entwickler: So ist der Konfigurator eingebunden</summary>
+          <div class="dev__body">
+            <p>
+              Ein <code>&lt;iframe&gt;</code> genügt – ohne JavaScript auf der einbindenden Seite. Der Konfigurator passt sich
+              der Rahmengröße an (ab 1024 px nebeneinander, darunter gestapelt) und braucht mindestens 640 px Höhe.
+            </p>
+            <pre><code>&lt;style&gt;
+  .citodomus-frame {
+    display: block;
+    width: 100%;
+    height: clamp(640px, calc(100dvh - 2rem), 820px);
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 12px 32px -4px rgba(43, 47, 51, .12);
+  }
+&lt;/style&gt;
+&lt;iframe
+  class="citodomus-frame"
+  src="https://ihre-domain.de/konfigurator/?embed=1"
+  title="CITODOMUS 3D-Hauskonfigurator"
+  loading="lazy"
+  allow="fullscreen; clipboard-write"
+&gt;&lt;/iframe&gt;</code></pre>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th scope="col">Parameter</th><th scope="col">Bedeutung</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>embed=1</code></td><td>Einbettungs-Modus (Pflicht)</td></tr>
+                  <tr>
+                    <td><code>partner=MAKLER-42</code></td>
+                    <td>optional: Partner-ID (3–40 Zeichen: A–Z, 0–9, Bindestrich) – wird jeder Anfrage beigefügt</td>
+                  </tr>
+                  <tr>
+                    <td><code>accent=1F5FAD</code></td>
+                    <td>optional: Akzentfarbe als Hex ohne <code>#</code>; zu helle Farben werden automatisch abgedunkelt</td>
+                  </tr>
+                  <tr>
+                    <td><code>#m=one&amp;fa=holz</code></td>
+                    <td>optional: Startkonfiguration im Format des Teilen-Links (z. B. Modell und Fassade)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ul>
+              <li>Den fertigen Code mit Partner-ID und Farbe erzeugt der Konfigurator selbst: Schritt 5 → „Für Partner / Webseiten“.</li>
+              <li>
+                Der Webserver des Konfigurators muss die Einbettung erlauben: Header
+                <code>Content-Security-Policy: frame-ancestors 'self' https://ihre-website.de</code> (oder ohne
+                <code>frame-ancestors</code> für beliebige Partnerseiten).
+              </li>
+              <li>HTTPS verwenden – Vollbild und Zwischenablage funktionieren nur in einem sicheren Kontext.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Beispielseite zur Einbindung des CITODOMUS-Hauskonfigurators – stellvertretend für eine andere Website.
+    </footer>
+  </body>
+</html>

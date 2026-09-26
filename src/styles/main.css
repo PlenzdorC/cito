@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+/* Die Beispielseiten für Host-Websites gehören nicht zum Konfigurator-Bundle. */
+@source not "../../beispiele";
 
 /* ----------------------------------------------------------------------------
  * Design-Tokens aus DESIGN.md (CITODOMUS Modular Living Configurator)

@@ -61,6 +61,14 @@ export function focusElement(id) {
   element.focus({ preventScroll: true });
 }
 
+/** Sendet ein Formular wie über seinen Absende-Button ab (Submit-Handler samt Prüfung). */
+export function submitForm(id) {
+  const form = document.getElementById(id);
+  if (!(form instanceof HTMLFormElement)) return false;
+  form.requestSubmit();
+  return true;
+}
+
 export function focusFirstInvalid(form) {
   const invalid = form?.querySelector('[aria-invalid="true"]');
   if (invalid) {

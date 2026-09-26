@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { render } from 'lit-html';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createActions } from '../../src/app/actions.js';
+import { submitForm } from '../../src/app/browser.js';
 import { deriveView } from '../../src/core/derive.js';
 import { createInitialState } from '../../src/core/state.js';
 import { createStore } from '../../src/core/store.js';
@@ -39,6 +40,8 @@ function mountApp(initial = createInitialState()) {
     scrollToSection: vi.fn(),
     focusElement: vi.fn(),
     focusFirstInvalid: vi.fn(),
+    // Echter Helfer: löst den Submit-Handler des gerenderten Formulars aus
+    submitForm,
     toggleFullscreen: vi.fn(),
     download: vi.fn(),
     logError: vi.fn(),
@@ -59,6 +62,16 @@ function mountApp(initial = createInitialState()) {
 }
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+function fillLead(app, { consent = true } = {}) {
+  app.$('#lead-name').value = 'Markus Weber';
+  app.$('#lead-phone').value = '+49 170 1234567';
+  app.$('#lead-email').value = 'markus@beispiel.de';
+  app.$('input[name="consent"]').checked = consent;
+}
+
+/** „Jetzt Traumhaus unverbindlich anfragen“ in der Preisleiste */
+const offerButton = (app) => app.$('#summary-bar .btn-primary');
 
 describe('Konfigurator-Oberfläche', () => {
   let app;
@@ -135,15 +148,14 @@ describe('Konfigurator-Oberfläche', () => {
     app.actions.requestOffer();
     expect(app.store.getState().step).toBe(5);
     expect(app.deps.focusElement).toHaveBeenCalledWith('lead-name');
+    // Der erste Klick führt nur zum Formular – ohne gleich Fehlermeldungen zu zeigen
+    expect(app.store.getState().lead.errors).toEqual({});
     const form = app.$('#panel-bauherr form');
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     expect(app.$('#lead-name').getAttribute('aria-invalid')).toBe('true');
     expect(app.deps.submitLead).not.toHaveBeenCalled();
 
-    app.$('#lead-name').value = 'Markus Weber';
-    app.$('#lead-phone').value = '+49 170 1234567';
-    app.$('#lead-email').value = 'markus@beispiel.de';
-    app.$('input[name="consent"]').checked = true;
+    fillLead(app);
     app.$('#panel-bauherr form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flush();
     expect(app.deps.submitLead).toHaveBeenCalledTimes(1);
@@ -151,6 +163,51 @@ describe('Konfigurator-Oberfläche', () => {
     expect(payload.contact).toMatchObject({ name: 'Markus Weber', email: 'markus@beispiel.de', consultation: 'video' });
     expect(payload.price.total).toBe(284900);
     expect(app.$('#panel-bauherr').textContent).toContain('Vielen Dank, Markus!');
+    // Formular samt Absende-Button verschwinden – der Fokus wandert zur Bestätigung
+    expect(app.deps.focusElement).toHaveBeenLastCalledWith('lead-success');
+  });
+
+  it('sendet das ausgefüllte Formular über „Jetzt Traumhaus unverbindlich anfragen“ ab', async () => {
+    app.actions.goToStep(5);
+    fillLead(app);
+    offerButton(app).click();
+    await flush();
+    expect(app.deps.focusElement).not.toHaveBeenCalledWith('lead-name');
+    expect(app.deps.submitLead).toHaveBeenCalledTimes(1);
+    expect(app.deps.submitLead.mock.calls[0][0].contact.name).toBe('Markus Weber');
+    expect(app.$('#lead-success').textContent).toContain('Vielen Dank, Markus!');
+    expect(app.deps.focusElement).toHaveBeenLastCalledWith('lead-success');
+
+    // Erneuter Klick nach dem Versand: kein zweiter Versand, sondern zurück zur Bestätigung
+    offerButton(app).click();
+    expect(app.deps.submitLead).toHaveBeenCalledTimes(1);
+    expect(app.deps.focusElement).toHaveBeenLastCalledWith('lead-success');
+  });
+
+  it('zeigt über den Anfrage-Button, was noch fehlt, statt ins ausgefüllte Namensfeld zu springen', () => {
+    app.actions.goToStep(5);
+    fillLead(app, { consent: false });
+    offerButton(app).click();
+    expect(app.deps.submitLead).not.toHaveBeenCalled();
+    expect(app.deps.focusElement).not.toHaveBeenCalledWith('lead-name');
+    expect(app.deps.focusFirstInvalid).toHaveBeenCalledWith(app.$('#lead-form'));
+    expect(app.$('#lead-name').getAttribute('aria-invalid')).toBe('false');
+    expect(app.$('#lead-consent-error').textContent).toContain('Bitte stimme');
+  });
+
+  it('holt aus dem Partner-Tab zuerst das Anfrageformular nach vorn, ohne es abzusenden', () => {
+    app.actions.goToStep(5);
+    app.actions.setOfferTab('partner');
+    offerButton(app).click();
+    expect(app.store.getState().offerTab).toBe('bauherr');
+    expect(app.store.getState().lead.errors).toEqual({});
+    expect(app.deps.focusElement).toHaveBeenCalledWith('lead-name');
+  });
+
+  it('zeigt den Sendestatus auch im Anfrage-Button der Preisleiste', () => {
+    app.store.setState((s) => ({ ...s, lead: { ...s.lead, status: 'sending' } }));
+    expect(offerButton(app).disabled).toBe(true);
+    expect(offerButton(app).querySelector('.animate-spin')).not.toBeNull();
   });
 
   it('schickt Bots eine Erfolgsmeldung, ohne etwas zu versenden', async () => {
@@ -169,13 +226,12 @@ describe('Konfigurator-Oberfläche', () => {
   it('zeigt Serverfehler verständlich an', async () => {
     app.deps.submitLead.mockRejectedValueOnce(new Error('Keine Verbindung zum Server.'));
     app.actions.goToStep(5);
-    app.$('#lead-name').value = 'Markus Weber';
-    app.$('#lead-phone').value = '+49 170 1234567';
-    app.$('#lead-email').value = 'markus@beispiel.de';
-    app.$('input[name="consent"]').checked = true;
+    fillLead(app);
     app.$('#panel-bauherr form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flush();
-    expect(app.$('#panel-bauherr [role="alert"]').textContent).toContain('Keine Verbindung');
+    expect(app.$('#lead-error[role="alert"]').textContent).toContain('Keine Verbindung');
+    // Auch nach einem Klick in der Preisleiste muss der Fehler sichtbar werden
+    expect(app.deps.focusElement).toHaveBeenLastCalledWith('lead-error');
   });
 
   it('erzeugt Embed-Code mit Partner-ID und kopiert ihn', async () => {
@@ -270,5 +326,50 @@ describe('Konfigurator-Oberfläche', () => {
         expect(Boolean(labelled), input.outerHTML.slice(0, 120)).toBe(true);
       });
     });
+  });
+});
+
+describe('Rücksprung zur aufrufenden Seite (?return=…)', () => {
+  const RETURN_TO = 'https://www.citodomus.example/haeuser/?utm_source=newsletter#modelle';
+  const returnLink = (app) => app.$('#return-link');
+  const params = (link) => new URL(link.getAttribute('href')).searchParams;
+
+  it('zeigt ohne Rücksprungadresse keinen Zurück-Link', () => {
+    const app = mountApp();
+    expect(returnLink(app)).toBeNull();
+  });
+
+  it('führt mit der aktuellen Konfiguration zur aufrufenden Seite zurück', () => {
+    const app = mountApp(createInitialState({ returnTo: RETURN_TO }));
+    expect(returnLink(app).getAttribute('aria-label')).toBe('Zurück zu citodomus.example');
+    expect(returnLink(app).textContent).toContain('citodomus.example');
+
+    app.actions.setOptions({ facade: 'holz' });
+    const url = new URL(returnLink(app).getAttribute('href'));
+    expect(url.origin + url.pathname + url.hash).toBe('https://www.citodomus.example/haeuser/#modelle');
+    expect(url.searchParams.get('utm_source')).toBe('newsletter');
+    expect(url.searchParams.get('config')).toBe('m=one&fa=holz');
+    expect(url.searchParams.get('configId')).toBe(deriveView(app.store.getState()).configId);
+    expect(url.searchParams.get('total')).toBe(String(deriveView(app.store.getState()).breakdown.total));
+    expect(url.searchParams.has('lead')).toBe(false);
+  });
+
+  it('bietet nach der Anfrage den Rücksprung samt Vorgangsnummer an', async () => {
+    const app = mountApp(createInitialState({ returnTo: RETURN_TO }));
+    app.actions.goToStep(5);
+    fillLead(app);
+    app.$('#lead-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+
+    const back = app.$('#lead-success a.btn-primary');
+    expect(back.textContent).toContain('Zurück zu citodomus.example');
+    const reference = app.store.getState().lead.reference;
+    expect(reference).toMatch(/^LEAD-CTD-/);
+    expect(params(back).get('lead')).toBe(reference);
+    expect(params(returnLink(app)).get('lead')).toBe(reference);
+
+    // „Neue Anfrage“ nimmt die Vorgangsnummer wieder aus dem Rücksprung heraus
+    app.$$('#lead-success button').find((b) => b.textContent.includes('Neue Anfrage')).click();
+    expect(params(returnLink(app)).has('lead')).toBe(false);
   });
 });

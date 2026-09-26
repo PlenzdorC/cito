@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beispiel 2: Konfigurator aufrufen und zurückkehren – CITODOMUS</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./beispiel-seite.css" />
+  </head>
+  <body>
+    <nav class="demo-bar" aria-label="Beispiel-Einbindungen">
+      <span class="demo-bar__label">Beispiel-Einbindung</span>
+      <a href="./einbettung-iframe.html">1 · Einbettung per iFrame</a>
+      <a href="./aufruf-mit-ruecksprung.html" aria-current="page">2 · Aufruf mit Rücksprung</a>
+    </nav>
+
+    <header class="site-header">
+      <span class="brand">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 3 3 13.5l2.4 2.9L16 7.7l10.6 8.7 2.4-2.9L25 10.2V5h-3.6v2.3Z" fill="#d96b43" />
+          <path d="M7.5 16.2 16 9.3l8.5 6.9V28h-6.2v-6.3h-4.6V28H7.5Z" fill="#2b2f33" />
+          <circle cx="13" cy="17" r="1.1" fill="#fff" />
+          <circle cx="19" cy="17" r="1.1" fill="#fff" />
+        </svg>
+        Citodomus
+      </span>
+      <span class="site-header__claim">In 6 Monaten zuhause.</span>
+    </header>
+
+    <main>
+      <!-- Ergebnis nach dem Rücksprung – wird vom Skript unten befüllt und eingeblendet -->
+      <section id="ergebnis" class="result" aria-labelledby="ergebnis-titel" tabindex="-1" hidden>
+        <img class="result__cito" src="../cito/cito-wave.jpg" alt="" width="88" height="88" />
+        <div>
+          <p class="eyebrow">Willkommen zurück</p>
+          <h2 id="ergebnis-titel">Deine Konfiguration <span class="result__id" data-feld="configId"></span></h2>
+          <p class="result__price">Festpreis <strong data-feld="total"></strong> inkl. MwSt.</p>
+          <p class="result__lead" data-feld="anfrage" hidden>
+            ✓ Deine Anfrage ist eingegangen (Vorgang <span data-feld="lead"></span>). Ein Bauberater meldet sich innerhalb
+            von 24 Stunden.
+          </p>
+          <div class="result__actions">
+            <a class="button button--primary" href="../" data-aktion="weiter">Weiter konfigurieren</a>
+            <a class="button" href="../" data-aktion="anfragen">Unverbindlich anfragen</a>
+            <button class="button" type="button" data-aktion="ausblenden">Ausblenden</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero" aria-labelledby="titel">
+        <div>
+          <p class="eyebrow">Modulare Häuser zum Festpreis</p>
+          <h1 id="titel">Dein Haus. In 6 Monaten zuhause.</h1>
+          <p class="lead">
+            Stell dir dein CITODOMUS-Haus im 3D-Konfigurator zusammen. Über „Zurück“ im Konfigurator landest du wieder hier –
+            mit deiner Konfiguration im Gepäck.
+          </p>
+          <div class="hero__actions">
+            <!-- Aufruf: href wird unten um ?return=<diese Seite> ergänzt; ohne JavaScript öffnet der Link den Konfigurator normal -->
+            <a class="button button--primary button--large" href="../" data-konfigurator="">Haus jetzt konfigurieren →</a>
+            <span class="hero__hint">5 Schritte · Live-Festpreis · unverbindlich</span>
+          </div>
+        </div>
+        <img class="hero__image" src="../cito/cito-architect.jpg" alt="Cito, der CITODOMUS-Bauberater" width="320" height="320" />
+      </section>
+
+      <section class="models" aria-labelledby="modelle-titel">
+        <h2 id="modelle-titel">Oder direkt mit einem Modell starten</h2>
+        <ul class="model-grid">
+          <li class="model-card">
+            <svg class="model-card__art" viewBox="0 0 160 90" aria-hidden="true">
+              <rect x="0" y="80" width="160" height="2" fill="#d1cdc6" />
+              <path d="M22 48 138 40v40H22Z" fill="#efe9df" />
+              <path d="M16 47.5 144 38.6v4.4L16 51.9Z" fill="#2b2f33" />
+              <rect x="34" y="58" width="26" height="14" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="70" y="58" width="12" height="22" rx="1" fill="#9d3e1a" />
+              <rect x="94" y="56" width="32" height="16" rx="1" fill="#2b2f33" opacity=".85" />
+            </svg>
+            <h3>Bungalow Alpha</h3>
+            <p>Eingeschossig, barrierefrei konzipiert · ab 95 m²</p>
+            <a href="../#m=alpha" data-konfigurator="m=alpha">Mit Alpha starten →</a>
+          </li>
+          <li class="model-card">
+            <svg class="model-card__art" viewBox="0 0 160 90" aria-hidden="true">
+              <rect x="0" y="80" width="160" height="2" fill="#d1cdc6" />
+              <path d="M48 38h64v42H48Z" fill="#efe9df" />
+              <path d="M42 40 80 13l38 27h-6L80 17 48 40Z" fill="#9d3e1a" />
+              <path d="M48 40 80 17l32 23Z" fill="#b5643f" />
+              <rect x="57" y="46" width="14" height="10" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="89" y="46" width="14" height="10" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="57" y="62" width="14" height="12" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="90" y="61" width="12" height="19" rx="1" fill="#2b2f33" />
+            </svg>
+            <h3>Cito One</h3>
+            <p>Zwei Etagen, Bestseller für Familien · ab 145 m²</p>
+            <a href="../#m=one" data-konfigurator="m=one">Mit Cito One starten →</a>
+          </li>
+          <li class="model-card">
+            <svg class="model-card__art" viewBox="0 0 160 90" aria-hidden="true">
+              <rect x="0" y="80" width="160" height="2" fill="#d1cdc6" />
+              <path d="M18 48h80v32H18Z" fill="#efe9df" />
+              <path d="M56 26h86v24H56Z" fill="#c28b56" />
+              <path d="M14 45h88v3H14ZM52 23h94v3H52Z" fill="#2b2f33" />
+              <rect x="26" y="56" width="44" height="22" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="66" y="31" width="64" height="12" rx="1" fill="#2b2f33" opacity=".85" />
+              <rect x="80" y="58" width="11" height="22" rx="1" fill="#9d3e1a" />
+            </svg>
+            <h3>Cito Grande</h3>
+            <p>Design-Villa mit Galerie und Doppel-Büro · ab 185 m²</p>
+            <a href="../#m=grande" data-konfigurator="m=grande">Mit Cito Grande starten →</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="dev" aria-labelledby="dev-titel">
+        <details>
+          <summary id="dev-titel">Für Entwickler: So funktionieren Aufruf und Rücksprung</summary>
+          <div class="dev__body">
+            <p>
+              <strong>Aufruf:</strong> Die Seite verlinkt den Konfigurator mit ihrer eigenen Adresse im Parameter
+              <code>return</code> (URL-kodiert). Optional folgen eine Partner-ID und eine Startkonfiguration:
+            </p>
+            <pre><code>https://ihre-domain.de/konfigurator/?return=https%3A%2F%2Fwww.ihre-website.de%2Fhaeuser%2F#m=one</code></pre>
+            <p>
+              Der Konfigurator zeigt dann oben links „Zurück zu ihre-website.de“ und nach einer Anfrage einen Zurück-Button.
+              <strong>Rücksprung:</strong> An die Adresse werden das Ergebnis und – falls gesendet – die Vorgangsnummer angehängt:
+            </p>
+            <pre><code>https://www.ihre-website.de/haeuser/?config=m%3Done%26fa%3Dholz&amp;configId=CTD-2026-4K9QX&amp;total=297250&amp;lead=CTD-2026-4K9QX</code></pre>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th scope="col">Parameter</th><th scope="col">Inhalt</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>config</code></td>
+                    <td>Konfiguration im Format des Teilen-Links – als <code>#…</code> an die Konfigurator-Adresse gehängt, öffnet sie genau dieses Haus wieder</td>
+                  </tr>
+                  <tr><td><code>configId</code></td><td>Konfigurations-ID, z. B. <code>CTD-2026-4K9QX</code></td></tr>
+                  <tr><td><code>total</code></td><td>Gesamtpreis in Euro inkl. MwSt. (nur zur Anzeige)</td></tr>
+                  <tr><td><code>lead</code></td><td>nur nach gesendeter Anfrage: Vorgangsnummer des Anfrage-Endpunkts</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <ul>
+              <li>
+                Zurückgeführt wird nur auf den eigenen Ursprung des Konfigurators und auf Ursprünge aus
+                <code>VITE_RETURN_ORIGINS</code> (z. B. <code>https://www.ihre-website.de</code>). Andere Adressen werden
+                ignoriert – das verhindert Weiterleitungen auf fremde Seiten.
+              </li>
+              <li>
+                Die Parameter kommen aus der Adresszeile und sind nicht vertrauenswürdig: prüfen, nur als Text ausgeben, Preise
+                nicht weiterverarbeiten. Verbindlich ist allein die Anfrage, die der Konfigurator an den Anfrage-Endpunkt sendet.
+              </li>
+              <li>Ohne JavaScript öffnen die Links den Konfigurator trotzdem – nur ohne Rücksprung.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Beispielseite zur Einbindung des CITODOMUS-Hauskonfigurators – stellvertretend für eine andere Website.
+    </footer>
+
+    <!-- ================= CITODOMUS-Konfigurator · Aufruf mit Rücksprung · Anfang ================= -->
+    <script>
+      (() => {
+        'use strict';
+
+        // Adresse des Konfigurators. Im Livebetrieb die öffentliche Adresse eintragen,
+        // z. B. 'https://ihre-domain.de/konfigurator/' – hier läuft er im selben Projekt.
+        const KONFIGURATOR_URL = new URL('../', window.location.href).href;
+
+        // Parameter, die der Konfigurator beim Rücksprung anhängt
+        const ERGEBNIS_PARAMETER = ['config', 'configId', 'total', 'lead'];
+
+        // Rücksprungadresse = diese Seite, ohne das Ergebnis eines früheren Besuchs
+        const seite = new URL(window.location.href);
+        ERGEBNIS_PARAMETER.forEach((name) => seite.searchParams.delete(name));
+        const RUECKSPRUNG_URL = seite.href;
+
+        /** Konfigurator-Adresse mit Rücksprung; `start` ist eine Startkonfiguration wie 'm=grande'. */
+        function konfiguratorUrl(start) {
+          const url = new URL(KONFIGURATOR_URL);
+          url.searchParams.set('return', RUECKSPRUNG_URL);
+          if (start) url.hash = start;
+          return url.href;
+        }
+
+        document.querySelectorAll('a[data-konfigurator]').forEach((link) => {
+          link.href = konfiguratorUrl(link.dataset.konfigurator);
+        });
+
+        // --- Ergebnis nach dem Rücksprung anzeigen -----------------------------------------------
+        // Werte aus der Adresszeile sind nicht vertrauenswürdig: prüfen und nur als Text einsetzen.
+        const params = new URLSearchParams(window.location.search);
+        const config = params.get('config') || '';
+        const configId = params.get('configId') || '';
+        const total = Number(params.get('total'));
+        const lead = params.get('lead') || '';
+        if (!/^m=[\w=&-]{1,1000}$/.test(config) || !/^CTD-\d{4}-[0-9A-Z]{5}$/.test(configId)) return;
+
+        const box = document.getElementById('ergebnis');
+        const feld = (name) => box.querySelector(`[data-feld="${name}"]`);
+        const aktion = (name) => box.querySelector(`[data-aktion="${name}"]`);
+
+        feld('configId').textContent = configId;
+        feld('total').textContent =
+          Number.isSafeInteger(total) && total > 0
+            ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(total)
+            : '–';
+        aktion('weiter').href = konfiguratorUrl(config);
+        aktion('anfragen').href = konfiguratorUrl(`${config}&s=5`); // s=5: direkt zu „Angebot & Kontakt“
+
+        if (/^[\w-]{1,64}$/.test(lead)) {
+          feld('lead').textContent = lead;
+          feld('anfrage').hidden = false;
+          aktion('anfragen').hidden = true;
+        }
+
+        aktion('ausblenden').addEventListener('click', () => {
+          box.hidden = true;
+          window.history.replaceState(null, '', RUECKSPRUNG_URL);
+        });
+
+        box.hidden = false;
+        box.focus({ preventScroll: true });
+      })();
+    </script>
+    <!-- ================= CITODOMUS-Konfigurator · Aufruf mit Rücksprung · Ende =================== -->
+  </body>
+</html>

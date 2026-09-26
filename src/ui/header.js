@@ -1,7 +1,8 @@
-import { html } from 'lit-html';
+import { html, nothing } from 'lit-html';
 import { STEPS } from '../data/catalog.js';
 import { CITO_AVATARS } from '../data/content.js';
 import { icon } from './icons.js';
+import { returnTarget } from './return-link.js';
 
 /** Hausförmiges Markenzeichen (Terracotta-Dach, Anthrazit-Korpus). */
 const logoMark = html`<svg class="shrink-0" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
@@ -38,29 +39,49 @@ function stepNav(state, actions) {
   </nav>`;
 }
 
-export function header(state, actions) {
+/** Zurück zur Seite, die den Konfigurator aufgerufen hat (nur mit ?return=…). */
+function backLink(target) {
+  if (!target) return nothing;
+  const label = `Zurück zu ${target.host}`;
+  return html`<a
+      id="return-link"
+      class="btn btn-quiet !gap-1.5 !p-2 md:!py-2 md:!pr-3.5 md:!pl-2.5"
+      href=${target.href}
+      aria-label=${label}
+      title=${label}
+    >
+      ${icon('arrow_back', { size: 18 })}
+      <span class="hidden max-w-40 truncate md:inline" aria-hidden="true">${target.host}</span>
+    </a>
+    <span class="hidden h-7 w-px bg-line-strong sm:block" aria-hidden="true"></span>`;
+}
+
+export function header(state, derived, actions) {
   return html`<header class="app-header" id="app-header">
     <div class="flex h-16 items-center justify-between gap-3 px-4 lg:h-[4.5rem] lg:px-8">
-      <a
-        class="flex shrink-0 items-center gap-2.5 rounded-lg"
-        href="#"
-        @click=${(event) => {
-          event.preventDefault();
-          actions.goToStep(1);
-        }}
-        aria-label="CITODOMUS 3D-Planer – zum Start"
-      >
-        ${logoMark}
-        <span class="flex flex-col leading-none">
-          <span class="flex items-center gap-1.5">
-            <span class="text-headline-sm font-extrabold tracking-tight text-primary uppercase">Citodomus</span>
-            <span class="hidden rounded-full bg-tertiary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-tertiary min-[400px]:inline"
-              >3D Planer</span
-            >
+      <div class="flex shrink-0 items-center gap-2.5 sm:gap-3">
+        ${backLink(returnTarget(state, derived))}
+        <a
+          class="flex shrink-0 items-center gap-2.5 rounded-lg"
+          href="#"
+          @click=${(event) => {
+            event.preventDefault();
+            actions.goToStep(1);
+          }}
+          aria-label="CITODOMUS 3D-Planer – zum Start"
+        >
+          ${logoMark}
+          <span class="flex flex-col leading-none">
+            <span class="flex items-center gap-1.5">
+              <span class="text-headline-sm font-extrabold tracking-tight text-primary uppercase">Citodomus</span>
+              <span class="hidden rounded-full bg-tertiary-container px-1.5 py-0.5 text-[11px] font-semibold text-on-tertiary min-[400px]:inline"
+                >3D Planer</span
+              >
+            </span>
+            <span class="mt-1 hidden text-label-tech text-on-surface-variant sm:block">In 6 Monaten zuhause.</span>
           </span>
-          <span class="mt-1 hidden text-label-tech text-on-surface-variant sm:block">In 6 Monaten zuhause.</span>
-        </span>
-      </a>
+        </a>
+      </div>
       ${state.partner
         ? html`<span class="hidden items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-label-tech whitespace-nowrap text-on-surface md:flex">
             <span class="size-2 rounded-full bg-tertiary"></span> Partner ${state.partner}

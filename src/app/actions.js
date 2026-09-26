@@ -91,9 +91,12 @@ export function createActions(store, deps) {
     },
 
     requestOffer() {
+      const { step, offerTab } = get();
       update((s) => S.setOfferTab(S.setDialog(s, null), 'bauherr'));
+      // Steht das Anfrageformular schon offen (Schritt 5, „Für Bauherren“), wird es abgesendet – die Prüfung zeigt, was noch fehlt.
+      if (step === 5 && offerTab === 'bauherr' && deps.submitForm('lead-form')) return;
       goToStep(5);
-      deps.afterRender(() => deps.focusElement('lead-name'));
+      deps.afterRender(() => deps.focusElement(get().lead.status === 'success' ? 'lead-success' : 'lead-name'));
     },
 
     embedFromShare() {
@@ -149,8 +152,11 @@ export function createActions(store, deps) {
         });
         const result = await deps.submitLead(payload);
         update((s) => S.setLead(s, { status: 'success', reference: result.reference, demo: result.demo, name: form.name.trim().split(/\s+/)[0] }));
+        // Das Formular samt Absende-Button verschwindet – Fokus und Blick gehen zur Bestätigung.
+        deps.afterRender(() => deps.focusElement('lead-success'));
       } catch (error) {
         update((s) => S.setLead(s, { status: 'idle', error: error.message }));
+        deps.afterRender(() => deps.focusElement('lead-error'));
       }
     },
 

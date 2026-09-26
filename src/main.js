@@ -13,6 +13,7 @@ import {
   prefersReducedMotion,
   safeLocalStorage,
   scrollToSection,
+  submitForm,
   toggleFullscreen,
 } from './app/browser.js';
 import { accentPalette } from './core/color.js';
@@ -23,6 +24,7 @@ import * as S from './core/state.js';
 import { createStore } from './core/store.js';
 import { parseEmbedParams } from './services/embed.js';
 import { submitLead } from './services/lead.js';
+import { parseReturnUrl } from './services/return-url.js';
 import { clearSavedConfiguration, loadSavedConfiguration } from './services/storage.js';
 import { appTemplate } from './ui/app.js';
 import { exposeTemplate } from './ui/print-expose.js';
@@ -42,6 +44,8 @@ const store = createStore(
     partner: embedParams.partner,
     embed: embedParams.embed,
     accent: embedParams.accent ? embedParams.accent.toUpperCase() : null,
+    // Aufruf mit Rücksprung (?return=…) – im iFrame bleibt die Seite ohnehin sichtbar, dort ohne Zurück-Link
+    returnTo: embedParams.embed ? null : parseReturnUrl(window.location.search),
   }),
 );
 
@@ -83,6 +87,7 @@ const { actions, toast } = createActions(store, {
   scrollToSection,
   focusElement,
   focusFirstInvalid,
+  submitForm,
   toggleFullscreen: () => toggleFullscreen(document.getElementById('viewport')),
   download: downloadBlob,
   logError: (error) => console.error('[Konfigurator]', error),

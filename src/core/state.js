@@ -11,7 +11,8 @@ export const DEFAULT_SUN = 15;
 
 const initialLead = () => ({ status: 'idle', errors: {}, error: null, reference: null, demo: false });
 
-export function createInitialState({ config = createDefaultConfig(), step = 1, partner = null, embed = false, accent = null } = {}) {
+/** `returnTo`: geprüfte Adresse der aufrufenden Seite (?return=…) oder null. */
+export function createInitialState({ config = createDefaultConfig(), step = 1, partner = null, embed = false, accent = null, returnTo = null } = {}) {
   return {
     config,
     step,
@@ -25,6 +26,7 @@ export function createInitialState({ config = createDefaultConfig(), step = 1, p
     noticeSeq: 0,
     partner,
     embed,
+    returnTo,
     offerTab: 'bauherr',
     lead: initialLead(),
     embedForm: {
